@@ -1,23 +1,23 @@
 let socket;
-
-    function setup() {
-      createCanvas(400, 200);
+let new_Message=''
+  function setup() {
+     createCanvas(400, 200);
       // Connect to WebSocket server
-      socket = new WebSocket("ws://localhost:8080");
+    socket = new WebSocket("ws://localhost:8080");
       // Set up WebSocket event handlers
-      socket.onopen = () => {
-        console.log("Connected to server");
+    socket.onopen = () => {
+      console.log("Connected to server");
       };
       socket.onmessage = (event) => {
-  if (typeof event.data === 'string') {
-    console.log("Message from server:", event.data);
-  } else {
-    // If the message is not a string, it might be a Blob object
-    // Convert it to a string using a FileReader
-    const reader = new FileReader();
-    reader.onload = function() {
-      console.log("Message from server:", reader.result);
-    };
+        if (typeof event.data === 'string') {
+          console.log("Message from server:", event.data);
+          new_Message=event.data
+        } else {
+          const reader = new FileReader();
+          reader.onload = function() {
+          console.log("Message from server:", reader.result);
+          new_Message=reader.result
+        };
     reader.readAsText(event.data);
   }
 };
@@ -37,6 +37,8 @@ let socket;
       textSize(16);
       fill(0);
       text("Press 'A' to send message to server", width / 2, height / 2);
+      text(new_Message, width / 2, height / 6);
+      
     }
 
     function keyPressed() {

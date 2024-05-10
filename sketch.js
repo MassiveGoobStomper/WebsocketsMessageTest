@@ -1,27 +1,19 @@
 let socket;
-let new_Message=''
-  function setup() {
-     createCanvas(400, 200);
+let message='';
+
+    function setup() {
+      createCanvas(400, 200);
       // Connect to WebSocket server
-    socket = new WebSocket("ws://localhost:8080");
+      socket = new WebSocket("ws://localhost:8080");
       // Set up WebSocket event handlers
-    socket.onopen = () => {
-      console.log("Connected to server");
+      socket.onopen = () => {
+        console.log("Connected to server");
       };
       socket.onmessage = (event) => {
-        if (typeof event.data === 'string') {
-          console.log("Message from server:", event.data);
-          new_Message=event.data
-        } else {
-          const reader = new FileReader();
-          reader.onload = function() {
-          console.log("Message from server:", reader.result);
-          new_Message=reader.result
-        };
-    reader.readAsText(event.data);
-  }
-};
-
+        // Handle incoming message from the server
+        const message = JSON.parse(event.data);
+        displayMessage(message.payload);
+      };
       socket.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
@@ -37,8 +29,20 @@ let new_Message=''
       textSize(16);
       fill(0);
       text("Press 'A' to send message to server", width / 2, height / 2);
-      text(new_Message, width / 2, height / 6);
-      
+      socket.onmessage = (event) => {
+        // Handle incoming message from the server
+        message = JSON.parse(event.data);
+        displayMessage(message.payload);
+      };
+      text(message, width / 2, height / 6);
+    }
+
+    function displayMessage(message) {
+      // Display message in the UI
+      const messageContainer = document.getElementById("messageContainer");
+      const p = document.createElement("p");
+      p.textContent = message;
+      messageContainer.appendChild(p);
     }
 
     function keyPressed() {
@@ -46,7 +50,7 @@ let new_Message=''
       if (key === 'A' || key === 'a') {
         if (socket.readyState === WebSocket.OPEN) {
           const message = prompt("Enter message to send to server:");
-          socket.send(message);
+          socket.send(JSON.stringify({ type: "chat", payload: message }));
           console.log("Message sent to server:", message);
         } else {
           console.error("WebSocket connection is not open");

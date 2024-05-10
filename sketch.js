@@ -23,7 +23,8 @@ let message='';
     }
 
     function draw() {
-      background(220);
+      if(message!=='')background(20);
+      else background(220)
       // Draw instructions
       textAlign(CENTER);
       textSize(16);
